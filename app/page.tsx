@@ -32,17 +32,28 @@ export default function CricketScoreboard() {
   const [data, setData] = useState<MatchData | null>(null)
   const [loading, setLoading] = useState(true)
 
+
   useEffect(() => {
-    fetch("/api/scrape")
-      .then((res) => res.json())
-      .then((d) => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("/api/scrape")
+        const d = await res.json()
         setData(d)
-        setLoading(false)
-      })
-      .catch((err) => {
+        setLoading(false) // only for first fetch
+      } catch (err) {
         console.error(err)
         setLoading(false)
-      })
+      }
+    }
+
+    // Initial fetch
+    fetchData()
+
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchData, 30000)
+
+    // Cleanup on unmount
+    return () => clearInterval(interval)
   }, [])
 
   if (loading) {

@@ -4,7 +4,7 @@ import puppeteer from "puppeteer";
 export async function GET() {
   try {
     const url =
-      "https://crex.com/scoreboard/WZA/1UA/8th-Match/1A3/6V/ken-vs-maw-8th-match-mens-t20-world-cup-africa-regional-final-2025/live";
+      "https://crex.com/scoreboard/WZ9/1UA/7th-Match/X/IM/bot-vs-zim-7th-match-mens-t20-world-cup-africa-regional-final-2025/live";
 
     const browser = await puppeteer.launch({
       headless: true,
