@@ -1,103 +1,160 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
+import { useEffect, useState } from "react"
+
+interface Batsman {
+  name: string
+  runs: string
+  balls: string
+  fours: string
+  sixes: string
+  sr: string
+}
+
+interface Bowler {
+  name: string
+  figures: string
+  overs: string
+  econ: string
+}
+
+interface MatchData {
+  matchTitle: string
+  team1: { name: string | null; flag: string | null; score: string; overs: string }
+  team2: { name: string | null; flag: string | null }
+  runRates: string[]
+  result: string
+  batsmen: Batsman[]
+  bowler: Bowler | null
+}
+
+export default function CricketScoreboard() {
+  const [data, setData] = useState<MatchData | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch("/api/scrape")
+      .then((res) => res.json())
+      .then((d) => {
+        setData(d)
+        setLoading(false)
+      })
+      .catch((err) => {
+        console.error(err)
+        setLoading(false)
+      })
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="w-full h-20 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 flex items-center justify-center">
+        <div className="text-white text-xl font-bold">Loading Live Cricket...</div>
+      </div>
+    )
+  }
+
+  if (!data) {
+    return (
+      <div className="w-full h-20 bg-gradient-to-r from-red-600 via-red-500 to-red-600 flex items-center justify-center">
+        <div className="text-white text-xl font-bold">Failed to Load Data</div>
+      </div>
+    )
+  }
+
+  const activeBatsmen = data.batsmen.slice(0, 2)
+
+  // Extract current run rate from runRates array
+  const currentRate =
+    data.runRates
+      .find((rate) => rate.includes("Current Rate"))
+      ?.split(":")[1]
+      ?.trim() || "7.86"
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+    <div
+      className="w-full h-20 relative overflow-hidden font-sans"
+      style={{
+        background: `linear-gradient(135deg, 
+          rgba(30, 64, 175, 0.95) 0%, 
+          rgba(109, 40, 217, 0.9) 25%, 
+          rgba(30, 64, 175, 0.95) 50%, 
+          rgba(109, 40, 217, 0.9) 75%, 
+          rgba(30, 64, 175, 0.95) 100%)`,
+      }}
+    >
+      <div className="flex items-center justify-between h-full px-6">
+        <div className="flex items-center">
+          {data.team1.flag && (
+            <img
+              src={data.team1.flag || "/placeholder.svg"}
+              alt={data.team1.name || "Team 1"}
+              className="w-16 h-12 object-cover rounded-sm  border-white shadow-lg"
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          )}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        <div className="flex items-center bg-black/60 rounded-lg px-6 py-2 shadow-xl border border-white/20">
+          <div className="text-center">
+            <div className="flex items-center gap-4">
+              <span className="text-white font-bold text-lg tracking-wider">
+                {data.team1.name?.substring(0, 3).toUpperCase() || "T1"}
+              </span>
+              <span className="text-white font-bold text-3xl">{data.team1.score}</span>
+              <span className="text-gray-300 text-lg">{data.team1.overs}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Current Rate Display */}
+        <div className="text-center bg-black/40 rounded-lg px-4 py-2 border border-white/20">
+          <div className="text-xs text-gray-200 uppercase tracking-wide font-semibold">CURRENT RATE</div>
+          <div className="text-2xl font-bold text-white">{currentRate}</div>
+        </div>
+
+        <div className="flex gap-10">
+          {activeBatsmen.map((batsman, index) => {
+            const lastName = batsman.name.split(" ").pop()?.toUpperCase() || batsman.name.toUpperCase()
+            const isNotOut = batsman.runs.includes("*")
+            const runs = batsman.runs.replace("*", "")
+
+            return (
+              <div key={index} className="text-center">
+                <div className="flex items-center gap-3">
+                  <span className="text-white font-bold text-lg tracking-wide"> {batsman.name}</span>
+                  <span className="text-white font-bold text-xl">
+                    {runs}
+                    {isNotOut && <span className="text-yellow-300">*</span>}
+                  </span>
+                  <span className="text-gray-200 text-sm">({batsman.balls})</span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        {data.bowler && (
+          <div className="text-center">
+            <div className="flex items-center gap-3">
+              <span className="text-white font-bold text-lg tracking-wide">
+                ⚾ {data.bowler.name.split(" ").pop()?.toUpperCase() || data.bowler.name.toUpperCase()}
+              </span>
+              <span className="text-white font-bold text-lg">{data.bowler.figures}</span>
+            </div>
+          </div>
+        )}
+
+        <div className="flex items-center">
+          {data.team2.flag && (
+            <img
+              src={data.team2.flag || "/placeholder.svg"}
+              alt={data.team2.name || "Team 2"}
+              className="w-16 h-12 object-cover rounded-sm  border-white shadow-lg"
+            />
+          )}
+        </div>
+
+  
+      </div>
     </div>
-  );
+  )
 }
